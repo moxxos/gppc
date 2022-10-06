@@ -1,0 +1,9 @@
+.venv
+*.egg*
+test*
+*.html
+*.gif
+*.jpg
+!gppc_example.jpg
+*.jpeg
+*.png
