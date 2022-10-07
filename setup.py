@@ -21,5 +21,6 @@ def _read_description(description_path: str) -> str | None:
 setup(
     description=_read_description('src/gppc/_description_.py'),
     long_description=_read_description('README.md'),
-    long_description_content_type='text/markdown'
+    long_description_content_type='text/markdown',
+    url='https://pypi.org/project/gppc/'
 )

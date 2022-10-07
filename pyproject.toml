@@ -14,7 +14,7 @@ keywords = [
     "Oldschool Runescape",
     "OS Runescape",
 ]
-authors = [{ name = "moxxos", email = "moxxos@proton.me" }]
+authors = [{ name = "moxxos" }, { email = "moxxos@proton.me" }]
 urls = { project = "https://github.com/moxxos/gppc" }
 license = { text = "GNU AGPLv3" }
 classifiers = [
