@@ -3,7 +3,7 @@
 
 # Package Modules
 from gppc.__description__ import short_description
-from gppc import _display
+from gppc._display import _print_item_data
 
 # External Packages
 import requests
@@ -166,7 +166,8 @@ def _search_item_data(item: str) -> list[tuple[str, str, str, str, str, str]]:
 
 def _command_line_parser(item_argument: str) -> argparse.ArgumentParser:
     """Creates the command line parser."""
-    parser = argparse.ArgumentParser(description=short_description)
+    parser = argparse.ArgumentParser(
+        description=short_description)
     parser.add_argument(
         item_argument,
         metavar='I',
@@ -187,7 +188,7 @@ def _main() -> None:
     for item in args[item_argument]:
         item = item.replace('_', ' ')
         total_item_data += _search_item_data(item)
-    _display._print_item_data(total_item_data)
+    _print_item_data(total_item_data)
 
 
 if (__name__ == "__main__"):

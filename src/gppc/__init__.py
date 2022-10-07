@@ -6,7 +6,7 @@ Includes limited module functionality.
 """
 
 from gppc.__version__ import __version__
-from gppc.gppc import _main, _search_item_data
+from gppc._gppc import _main, _search_item_data
 
 
 def search(item: str) -> list[tuple[str, str, str, str]]:
