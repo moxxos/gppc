@@ -27,11 +27,11 @@ $ gppc.search('coal')
 
 # Updates
 
-### [CHANGELOG](https://github.com/moxxos/gppc/blob/main/README.md)
-
 #### TODO
 - [ ] Add option for a full version showing all item data
 - [ ] Add option to disable images
 - [ ] Add compact version with no images and smaller vertical display
 - [ ] Add some caching for images and other static item data
 - [ ] Add tests and documentation
+
+### [CHANGELOG](https://github.com/moxxos/gppc/blob/main/README.md)
