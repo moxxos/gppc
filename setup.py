@@ -1,27 +1,25 @@
 #!/usr/bin/env python3
 import os.path
+
 from setuptools import setup
 
 
-def _read_short(description_path):
-    """Read a short description from source."""
+def _read_description(description_path: str) -> str | None:
+    """Read a description from source."""
     here = os.path.abspath(os.path.dirname(__file__))
-    with open(os.path.join(here, description_path), 'r') as _description_py:
-        for line in _description_py.read().splitlines():
-            if line.startswith('_short_description'):
-                delim = '"""' if '"""' in line else '"' if '"' in line else "'"
-                return line.split(delim)[1]
+    with open(os.path.join(here, description_path), 'r') as description_file:
+        file_ext = description_path.split(".")[1]
+        if (file_ext == 'py'):
+            for line in description_file.read().splitlines():
+                if line.startswith('short_description'):
+                    delim = '"""' if '"""' in line else '"' if '"' in line else "'"
+                    return line.split(delim)[1]
+        elif (file_ext == 'md'):
+            return description_file.read()
 
 
-def _write_short(description_name, description_path):
-    """Dynamically write a short description file for pyproject.toml."""
-    short_txt = open(description_name, "w")
-    desc = _read_short(description_path)
-    short_txt.write(str(desc))
-    short_txt.close
-
-
-_write_short('SHORT.txt', 'src/gppc/_description_.py')
-
-
-setup()
+setup(
+    description=_read_description('src/gppc/_description_.py'),
+    long_description=_read_description('README.md'),
+    long_description_content_type='text/markdown'
+)

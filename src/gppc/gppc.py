@@ -2,7 +2,7 @@
 """Implements the core functionality of gppc."""
 
 # Package Modules
-from gppc._description_ import _short_description
+from gppc._description_ import short_description
 from gppc import _display
 
 # External Packages
