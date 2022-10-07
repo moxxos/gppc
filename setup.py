@@ -18,9 +18,12 @@ def _read_description(description_path: str) -> str | None:
             return description_file.read()
 
 
+changes = _read_description('CHANGELOG.md')
+
 setup(
-    description=_read_description('src/gppc/_description_.py'),
-    long_description=_read_description('README.md'),
+    description=_read_description('src/gppc/__description__.py'),
+    long_description=_read_description(
+        'README.md') + '\n' + _read_description('CHANGELOG.md'),
     long_description_content_type='text/markdown',
     url='https://pypi.org/project/gppc/'
 )

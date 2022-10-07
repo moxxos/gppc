@@ -1,3 +1,8 @@
+## [0.1.4] - 2022-10-07
+### Removed pycache from repo.
+### Added MANIFEST.in to process CHANGELOG.md during build process.
+#
+
 ## [0.1.3] - 2022-10-07
 ### Fixed README and description for build and setup.
 ### PYPI description now renders correctly.

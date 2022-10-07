@@ -35,4 +35,4 @@ package-dir = { "" = "src" }
 license-files = ["LICENSE.txt"]
 
 [tool.setuptools.dynamic]
-version = { attr = "gppc._version_.__version__" }
+version = { attr = "gppc.__version__.__version__" }

@@ -5,7 +5,7 @@ Check OSRS Grand Exchange prices from the command line.
 Includes limited module functionality.
 """
 
-from gppc._version_ import __version__
+from gppc.__version__ import __version__
 from gppc.gppc import _main, _search_item_data
 
 
