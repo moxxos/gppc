@@ -166,7 +166,7 @@ def _search_item_data(item: str) -> list[tuple[str, str, str, str, str, str]]:
 
 def _command_line_parser(item_argument: str) -> argparse.ArgumentParser:
     """Creates the command line parser."""
-    parser = argparse.ArgumentParser(description=_short_description)
+    parser = argparse.ArgumentParser(description=short_description)
     parser.add_argument(
         item_argument,
         metavar='I',

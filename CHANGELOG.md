@@ -1,4 +1,4 @@
-## [0.1.2] - 2022-10-07
+## [0.1.3] - 2022-10-07
 ### Fixed README and description for build and setup.
 ### PYPI description now renders correctly.
 #
@@ -7,6 +7,5 @@
 ### Now works. Also displays item images.
 #
 
-
-## [0.1.0] - 2022-09-12</h2>
+## [0.1.0] - 2022-09-12
 ### Configured pyproject.toml

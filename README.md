@@ -23,8 +23,8 @@ $ gppc.search('coal')
 ```
 
 # Updates
-## [CHANGELOG](https://raw.githubusercontent.com/moxxos/gppc/main/CHANGELOG.md)
 
+## [CHANGELOG](https://raw.githubusercontent.com/moxxos/gppc/main/CHANGELOG.md)
 ### TODO
 - [ ] Add option for a full version showing all item data
 - [ ] Add option to disable images
