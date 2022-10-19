@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
-"""Implements the core functionality of gppc."""
+"""
+Implements the core functionality of gppc.
+
+Copyright (C) 2022 moxxos
+"""
 
 # Package Modules
+from gppc.__version__ import __version__
 from gppc.__description__ import short_description
 from gppc._display import _print_item_data
 
@@ -112,8 +117,8 @@ def _search_page_parser(item: str, item_page='1'):
                         NextPageParser.feed(next_page.text)
                         self.item_data += NextPageParser.get_search_data()
                 except ValueError:
-                    "This is an ellipsis."
-
+                    # This is an ellipsis.
+                    None
             if (self.in_page_list and tag == 'div'):
                 self.in_page_list = False
 

@@ -1,3 +1,8 @@
+## [0.1.5.] - 2022-10-18
+### Display output now works on Windows.
+### Added image caching.
+#
+
 ## [0.1.4] - 2022-10-07
 ### Removed pycache from repo.
 ### Added MANIFEST.in to process CHANGELOG.md during build process.
@@ -14,3 +19,4 @@
 
 ## [0.1.0] - 2022-09-12
 ### Configured pyproject.toml
+#

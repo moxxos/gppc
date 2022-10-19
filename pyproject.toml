@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gppc"
-requires-python = ">=3.10"
+requires-python = ">=3.8,<3.11"
 keywords = [
     "OSRS",
     "Grand Exchange",
@@ -15,14 +15,15 @@ keywords = [
     "OS Runescape",
 ]
 authors = [{ name = "moxxos" }, { email = "moxxos@proton.me" }]
-urls = { project = "https://github.com/moxxos/gppc" }
 license = { text = "GNU AGPLv3" }
 classifiers = [
     "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
-dependencies = ["requests", "climage"]
-dynamic = ["version", "description", "readme"]
+dependencies = ["requests", "climage", "platformdirs"]
+dynamic = ["version", "description", "readme", "urls"]
 
 [project.scripts]
 gppc = "gppc:main"

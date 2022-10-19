@@ -10,6 +10,13 @@ Installation
 ```bash
 $ pip install gppc
 ```
+
+```bash 
+$ git clone https://github.com/moxxos/gppc.git
+$ cd gppc
+$ pip install .
+```
+
 Get the price and recent 24h change of many different Grand Exchange items.
 
 ```bash
@@ -31,7 +38,7 @@ $ gppc.search('coal')
 - [ ] Add option for a full version showing all item data
 - [ ] Add option to disable images
 - [ ] Add compact version with no images and smaller vertical display
-- [ ] Add some caching for images and other static item data
+- [x] Add some caching for images and other static item data
 - [ ] Add tests and documentation
 
-### [CHANGELOG](https://github.com/moxxos/gppc/blob/main/README.md)
+## [CHANGELOG](https://github.com/moxxos/gppc/blob/main/CHANGELOG.md)

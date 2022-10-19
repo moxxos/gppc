@@ -23,7 +23,10 @@ changes = _read_description('CHANGELOG.md')
 setup(
     description=_read_description('src/gppc/__description__.py'),
     long_description=_read_description(
-        'README.md') + '\n' + _read_description('CHANGELOG.md'),
+        'README.md') + '\n' + changes,
     long_description_content_type='text/markdown',
-    url='https://pypi.org/project/gppc/'
+    url='https://pypi.org/project/gppc/',
+    project_urls={
+        'Project': 'https://github.com/moxxos/gppc'
+    }
 )
