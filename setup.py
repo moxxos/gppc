@@ -27,6 +27,6 @@ setup(
     long_description_content_type='text/markdown',
     url='https://pypi.org/project/gppc/',
     project_urls={
-        'Project': 'https://github.com/moxxos/gppc'
+        'Source': 'https://github.com/moxxos/gppc'
     }
 )
