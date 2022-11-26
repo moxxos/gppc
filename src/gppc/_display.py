@@ -17,10 +17,7 @@ USE_DB = True
 
 
 def _get_item_pic(pic_src: str) -> Image:
-    headers = {
-        'user-agent': 'Mozilla/5.0'
-    }
-    pic_req = requests.get(pic_src, headers=headers)
+    pic_req = requests.get(pic_src, headers={'user-agent': 'Mozilla/5.0'})
     return Image.open(BytesIO(pic_req.content))
 
 

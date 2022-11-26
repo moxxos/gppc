@@ -27,9 +27,9 @@ class DbManager():
         self.db_conn = sqlite3.connect(
             os.path.join(appdata_path, DATABASE_NAME))
         self.db_cur = self.db_conn.cursor()
-        self._init_db()
+        self.__init_db()
 
-    def _init_db(self) -> None:
+    def __init_db(self) -> None:
         res = self.db_cur.execute(
             f"SELECT name FROM sqlite_master WHERE name='{MAINTABLE_NAME}'")
         if res.fetchone() is not None:

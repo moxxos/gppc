@@ -1,3 +1,3 @@
-from gppc import main
+from gppc import _main
 
-main()
+_main()
