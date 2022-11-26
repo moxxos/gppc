@@ -113,7 +113,7 @@ class _SearchPageParser(HTMLParser):
             self.__td_counter += 1
 
         if (tag == 'table' and self.__in_results_table):
-            self.__in_results_table= False
+            self.__in_results_table = False
 
         # If another page exists recursively get the next page.
         if (tag == 'a' and self.__in_page_list):
@@ -121,12 +121,12 @@ class _SearchPageParser(HTMLParser):
             # This cannot be converted to an integer.
             try:
                 if (int(self.__data) == int(self.__page) + 1):
-                    NextPageParser = _SearchPageParser(self.__item, 
+                    NextPageParser = _SearchPageParser(self.__item,
                                                        self.__data)
                     next_page = _request_search_page(self.__item, self.__data)
                     NextPageParser.feed(next_page.text)
                     self.__item_data = [*self.__item_data,
-                                      *NextPageParser.get_search_data()]
+                                        *NextPageParser.get_search_data()]
             except ValueError:
                 # This is an ellipsis.
                 None
@@ -167,6 +167,7 @@ def _request_search_page(item: str, page='') -> requests.Response:
         headers=headers,
         params=params)
 
+
 def _search_item_data(item: str) -> list[tuple[str, str, str, str, str, str]]:
     """
     Search for an item. 
@@ -182,6 +183,7 @@ def _search_item_data(item: str) -> list[tuple[str, str, str, str, str, str]]:
     search_parser = _SearchPageParser(item)
     search_parser.feed(search_page.text)
     return search_parser.get_search_data()
+
 
 def _command_line_parser(item_argument: str) -> argparse.ArgumentParser:
     """Creates the command line parser."""
@@ -202,6 +204,7 @@ def _command_line_parser(item_argument: str) -> argparse.ArgumentParser:
     )
     return parser
 
+
 def _main() -> None:
     """Main command line function."""
     item_argument = 'item(s)'
@@ -215,8 +218,10 @@ def _main() -> None:
             total_item_data.append(item_data)
     _print_item_data(total_item_data)
 
+
 if (__name__ == "__main__"):
     _main()
+
 
 def search(item) -> None:
     _print_item_data(_search_item_data(item))
