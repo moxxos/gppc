@@ -1,25 +1,131 @@
 """
-Encapsulates all data of a single item.
+Encapsulates all historical data of a single item.
 
 Copyright (C) 2022 moxxos
 """
 
+from datetime import date
 from html.parser import HTMLParser
+
 import requests
 
 from gppc._gppc import _search_item_data
+from gppc._db import DbManager
+from gppc._display import _get_item_pic
 
 
-_SCRIPT_PRICE = 'average180'
-_SCRIPT_TRADE = 'trade180'
+_VAR_PRICE = 'average180'
+_VAR_TRADE = 'trade180'
+_DATA_START = '.push([new Date(\''
+_DATA_END = '), '
+
+_PRICE_LEN = len(_VAR_PRICE)
+_TRADE_LEN = len(_VAR_TRADE)
+_DATA_START_LEN = len(_DATA_START)
+_DATA_END_LEN = len(_DATA_END)
+
+ItemHistoryData = list[str, str, str, str]
 
 
 class Item():
 
-    class __ItemPageParser(HTMLParser):
-        def __init__(self, item) -> None:
+    def __init__(self, item: str):
+        if ((item := item.capitalize()) in
+            (item_list := list(map(lambda item_tuple: item_tuple[0],
+                                   search_results := _search_item_data(item))))):
+            item_link = search_results[(
+                item_index := item_list.index(item))][4]
+            item_page = requests.get(item_link,
+                                     headers={'user-agent': 'Mozilla/5.0'},
+                                     timeout=100)
+            # (item_name, item_id, item_price, item_change, item_url, item_pic_url)
+            self.__item_data = search_results[item_index]
+
+            # Store item basic data if it does not already exist
+            db_man = DbManager()
+
+            if db_man.is_item_stored(self.__item_data[1]):
+                _, self.__item_pic = db_man.retrieve_item(self.__item_data[1])
+            else:
+                self.__item_pic = _get_item_pic(self.__item_data[5])
+                db_man.store_item(self.__item_data[1],
+                                  self.__item_data[0], self.__item_pic)
+
+            db_man.close_db()
+
+            self.__item_parser = self._ItemPageParser()
+            self.__item_parser.feed(item_page.text)
+
+            self.__gp_change_stats = self.__item_parser.gp_change_stats
+            self.__pc_change_stats = self.__item_parser.pc_change_stats[::2]
+            self.__raw_item_history = self.__item_parser.raw_item_history
+
+            self.__recent_historical = Item.__process_raw_history(
+                self.__raw_item_history, [])
+        else:
+            raise Exception('Item not found')
+
+    @property
+    def recent_historical(self):
+        return tuple(self.__recent_historical)
+
+    @property
+    def gp_change_stats(self):
+        return tuple(self.__gp_change_stats)
+
+    @property
+    def pc_change_stats(self):
+        return tuple(self.__pc_change_stats)
+
+    @property
+    def full_historical(self):
+
+    def save_historical(self):
+        """
+        Stores all current and historical item data in the app cache. If the item
+        already exists it will read the existing data and add any new historical data.
+        """
+        db_man = DbManager()
+
+        for item_date_data in self.__recent_historical:
+            # Date, Price, Average, Volume
+            if not db_man.does_date_exist(item_date_data[0]):
+                db_man.add_date_column(item_date_data[0])
+            if not db_man.check_item_date(self.__item_data[1], item_date_data[0]):
+                db_man.store_item_date(self.__item_data[1], *item_date_data)
+
+        db_man.close_db()
+
+    @ staticmethod
+    def __process_raw_history(raw_data: str,
+                              output_array: list[str, str]):
+
+        if (price_loc := raw_data.find(_VAR_PRICE + _DATA_START)) == -1:
+            return output_array
+
+        item_date = raw_data[price_loc + _PRICE_LEN + _DATA_START_LEN:
+                             price_loc + (end_paren_loc := raw_data[price_loc:].
+                                          find(_DATA_END)) - 1]
+        price = raw_data[(loc := price_loc
+                          + end_paren_loc + _DATA_END_LEN):
+                         loc + (comma_loc := raw_data[loc:].find(','))]
+        average = raw_data[(loc := loc + comma_loc):loc
+                           + (bracket_loc := raw_data[loc:].find(']'))]
+        if raw_data[loc:].find(_VAR_TRADE + _DATA_START) == -1:
+            trade = "No Trade Volume Data Available"
+        else:
+            trade_loc = raw_data[(loc := loc + bracket_loc):].find(',')
+            trade = raw_data[(loc := loc + trade_loc):loc + raw_data[loc:].find(']')]
+            trade = trade.strip(_DATA_END)
+        output_array.append((date(*(list(map(int, item_date.split('/'))))),
+                             price,
+                             average.strip(_DATA_END),
+                             trade))
+        return Item.__process_raw_history(raw_data[loc:], output_array)
+
+    class _ItemPageParser(HTMLParser):
+        def __init__(self) -> None:
             super().__init__()
-            self.__item = item
             self.__data = ''
             self.__in_stats_div = False
             self.__in_stats_ul = False
@@ -29,7 +135,8 @@ class Item():
             self.pc_change_stats = []
             self.raw_item_history = ''
 
-        def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        def handle_starttag(self, tag: str,
+                            attrs: list[tuple[str, str | None]]) -> None:
             if (tag == 'div' and ('class', 'stats') in attrs):
                 self.__in_stats_div = True
 
@@ -47,28 +154,12 @@ class Item():
                 self.__in_stats_div = self.__in_stats_ul = False
 
             if (tag == 'span' and self.__in_stats_ul):
-                if (self.__is_gp_change):
+                if self.__is_gp_change:
                     self.gp_change_stats.append(self.__data)
                 else:
                     self.pc_change_stats.append(self.__data)
 
         def handle_data(self, data: str) -> None:
-            if (data.find(_SCRIPT_PRICE) != -1):
+            if data.find(_VAR_PRICE) != -1:
                 self.raw_item_history = data
             self.__data = data
-
-    def __init__(self, item: str):
-        if ((item := item.capitalize()) in
-            (item_list := list(map(lambda item_tuple: item_tuple[0],
-                                   search_results := _search_item_data(item))))):
-            item_link = search_results[(
-                item_index := item_list.index(item))][4]
-            item_page = requests.get(item_link,
-                                     headers={'user-agent': 'Mozilla/5.0'})
-            self.__item = item
-            self.__item_data = search_results[item_index]
-            self.__item_parser = self.__ItemPageParser(item)
-            self.__item_parser.feed(item_page.text)
-            self.gp_change_stats = self.__item_parser.gp_change_stats
-            self.pc_change_stats = self.__item_parser.pc_change_stats[::2]
-            self.raw_item_history = self.__item_parser.raw_item_history
