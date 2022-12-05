@@ -22,7 +22,7 @@ classifiers = [
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
 ]
-dependencies = ["requests", "climage", "platformdirs"]
+dependencies = ["requests", "climage", "platformdirs", "pandas"]
 dynamic = ["version", "description", "readme", "urls"]
 
 [project.scripts]
