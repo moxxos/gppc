@@ -8,7 +8,6 @@ Copyright (C) 2022 moxxos
 # Standard Library
 import argparse
 from html.parser import HTMLParser
-from datetime import date
 
 # External Packages
 import requests

@@ -8,12 +8,14 @@ from datetime import date
 from html.parser import HTMLParser
 
 import requests
+import pandas
 
 from gppc._gppc import _search_item_data
 from gppc._db import DbManager
 from gppc._display import _get_item_pic
 
-
+_WIKI_API = ''
+_BACKUP_API = ''
 _VAR_PRICE = 'average180'
 _VAR_TRADE = 'trade180'
 _DATA_START = '.push([new Date(\''
@@ -24,7 +26,7 @@ _TRADE_LEN = len(_VAR_TRADE)
 _DATA_START_LEN = len(_DATA_START)
 _DATA_END_LEN = len(_DATA_END)
 
-ItemHistoryData = list[str, str, str, str]
+ItemHistoryData = tuple[str, str, str, str]
 
 
 class Item():
@@ -41,17 +43,7 @@ class Item():
             # (item_name, item_id, item_price, item_change, item_url, item_pic_url)
             self.__item_data = search_results[item_index]
 
-            # Store item basic data if it does not already exist
-            db_man = DbManager()
-
-            if db_man.is_item_stored(self.__item_data[1]):
-                _, self.__item_pic = db_man.retrieve_item(self.__item_data[1])
-            else:
-                self.__item_pic = _get_item_pic(self.__item_data[5])
-                db_man.store_item(self.__item_data[1],
-                                  self.__item_data[0], self.__item_pic)
-
-            db_man.close_db()
+            self.__init_item()
 
             self.__item_parser = self._ItemPageParser()
             self.__item_parser.feed(item_page.text)
@@ -65,9 +57,23 @@ class Item():
         else:
             raise Exception('Item not found')
 
+    def __init_item(self):
+        # Store item basic data if it does not already exist
+        db_man = DbManager()
+
+        if db_man.is_item_stored(self.__item_data[1]):
+            _, self.__item_pic = db_man.retrieve_item(self.__item_data[1])
+        else:
+            self.__item_pic = _get_item_pic(self.__item_data[5])
+            db_man.store_item(self.__item_data[1],
+                              self.__item_data[0], self.__item_pic)
+
+        db_man.close_db()
+
     @property
     def recent_historical(self):
-        return tuple(self.__recent_historical)
+        """Returns the most recent 6-month item history."""
+        return Item.__format_history(self.__recent_historical)
 
     @property
     def gp_change_stats(self):
@@ -79,22 +85,49 @@ class Item():
 
     @property
     def full_historical(self):
-
-    def save_historical(self):
         """
-        Stores all current and historical item data in the app cache. If the item
+        Stores recent historical item date in the cache. Then retrieves
+        all item history data.
+        """
+
+        self.__init_item()  # for debugging purposes
+        self.save_historical()
+        db_man = DbManager()
+        full_historical = tuple(db_man.get_item_past(self.__item_data[1]))
+
+        db_man.close_db()
+
+        return Item.__format_history(full_historical)
+
+    def save_historical(self) -> int:
+        """
+        Stores recent historical item data in the cache. If the item
         already exists it will read the existing data and add any new historical data.
         """
+
+        update_count = 0
+        create_count = 0
         db_man = DbManager()
 
         for item_date_data in self.__recent_historical:
             # Date, Price, Average, Volume
             if not db_man.does_date_exist(item_date_data[0]):
                 db_man.add_date_column(item_date_data[0])
+                create_count += 1
             if not db_man.check_item_date(self.__item_data[1], item_date_data[0]):
                 db_man.store_item_date(self.__item_data[1], *item_date_data)
+                update_count += 1
 
         db_man.close_db()
+        if (create_count or update_count):
+            print(
+                f"SAVED ITEM: {self.__item_data[0]}, id: {self.__item_data[1]}")
+        if (create_count):
+            print(f"{create_count} NEW DATES CREATED")
+        if (update_count):
+            print(f"{update_count} RECORDS UPDATED")
+
+        return update_count
 
     @ staticmethod
     def __process_raw_history(raw_data: str,
@@ -122,6 +155,15 @@ class Item():
                              average.strip(_DATA_END),
                              trade))
         return Item.__process_raw_history(raw_data[loc:], output_array)
+
+    @staticmethod
+    def __format_history(data_historical: list[ItemHistoryData]):
+        data = list(map(lambda date_data: date_data[1:], data_historical))
+        dates = list(map(lambda date_data: date_data[0], data_historical))
+        return pandas.DataFrame(data, index=dates,
+                                columns=['Price',
+                                         'Average',
+                                         'Volume']).rename_axis('Date')
 
     class _ItemPageParser(HTMLParser):
         def __init__(self) -> None:
