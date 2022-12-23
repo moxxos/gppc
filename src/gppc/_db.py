@@ -19,10 +19,6 @@ _ITEM_ID = 'id'
 _ITEM_NAME = 'item_name'
 _SM_IMG = 'sm_img'
 
-_PRICE_DAILY = 'price_daily'
-_PRICE_AVERAGE = 'price_average'
-_TRADE_VOLUME = 'trade_volume'
-
 
 class DbManager():
     def __init__(self) -> None:
@@ -145,8 +141,8 @@ class DbManager():
         return date(*list(map(int, input_date.split('_')[1:])))
 
     @ staticmethod
-    def __format_date_data(price=None, average=None, volume=None, date_data_str=None):
+    def __format_date_data(price=None, average=None,
+                           volume=None, date_data_str=None) -> list[str] | str:
         if (price is None and date_data_str is not None):
             return date_data_str.split('|')
-        if (price is not None and date_data_str is None):
-            return str(price) + '|' + str(average) + '|' + str(volume)
+        return str(price) + '|' + str(average) + '|' + str(volume)

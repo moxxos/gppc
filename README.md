@@ -1,7 +1,7 @@
 # GPPC (Gold Piece Price Checker) 
 
 Check OSRS Grand Exchange prices from the command line. 
-Includes module functionality.
+Includes module functionality to check item full price history.
 
 # Usage
 

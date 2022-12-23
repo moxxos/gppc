@@ -8,10 +8,12 @@ requires-python = ">=3.8,<3.11"
 keywords = [
     "OSRS",
     "Grand Exchange",
+    "GrandExchange",
     "GE",
-    "OSRS GE",
+    "OSRS Grand Exchange",
     "Runescape",
     "Oldschool Runescape",
+    "Old School Runescape",
     "OS Runescape",
 ]
 authors = [{ name = "moxxos" }, { email = "moxxos@proton.me" }]

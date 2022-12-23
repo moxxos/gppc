@@ -125,7 +125,7 @@ class _SearchPageParser(HTMLParser):
                     self.__item_data = [*self.__item_data,
                                         *next_page_parser.get_search_data()]
             except ValueError:
-                None
+                return
         if (self.__in_page_list and tag == 'div'):
             self.__in_page_list = False
 

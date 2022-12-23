@@ -30,28 +30,30 @@ ItemHistoryData = tuple[str, str, str, str]
 
 
 class Item():
+    """Encapsulates all historical data of a single item."""
 
     def __init__(self, item: str):
         if ((item := item.capitalize()) in
             (item_list := list(map(lambda item_tuple: item_tuple[0],
                                    search_results := _search_item_data(item))))):
-            item_link = search_results[(
-                item_index := item_list.index(item))][4]
-            item_page = requests.get(item_link,
-                                     headers={'user-agent': 'Mozilla/5.0'},
-                                     timeout=100)
             # (item_name, item_id, item_price, item_change, item_url, item_pic_url)
-            self.__item_data = search_results[item_index]
-
+            self.__item_data = search_results[item_list.index(item)]
+            self.__name = self.__item_data[0]
+            self.__id = self.__item_data[1]
+            self.__price = self.__item_data[2]
+            self.__change = self.__item_data[3]
+            self.__url = self.__item_data[4]
             self.__init_item()
 
+            item_page = requests.get(self.__url,
+                                     headers={'user-agent': 'Mozilla/5.0'},
+                                     timeout=100)
             self.__item_parser = self._ItemPageParser()
             self.__item_parser.feed(item_page.text)
 
             self.__gp_change_stats = self.__item_parser.gp_change_stats
             self.__pc_change_stats = self.__item_parser.pc_change_stats[::2]
             self.__raw_item_history = self.__item_parser.raw_item_history
-
             self.__recent_historical = Item.__process_raw_history(
                 self.__raw_item_history, [])
         else:
@@ -69,6 +71,22 @@ class Item():
                               self.__item_data[0], self.__item_pic)
 
         db_man.close_db()
+
+    @property
+    def name(self):
+        return self.__name
+
+    @property
+    def id(self):
+        return self.__id
+
+    @property
+    def current_price(self):
+        return self.__price
+
+    @property
+    def change_24h(self):
+        return self.__change
 
     @property
     def recent_historical(self):
@@ -122,9 +140,9 @@ class Item():
         if (create_count or update_count):
             print(
                 f"SAVED ITEM: {self.__item_data[0]}, id: {self.__item_data[1]}")
-        if (create_count):
+        if create_count:
             print(f"{create_count} NEW DATES CREATED")
-        if (update_count):
+        if update_count:
             print(f"{update_count} RECORDS UPDATED")
 
         return update_count
