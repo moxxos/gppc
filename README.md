@@ -39,7 +39,7 @@ $ gppc gold_bar coal
 ```python
 >>> from gppc import Item
 >>> coal = Item('coal')
->>> coal.recent_historical
+>>> coal.recent_history
            Price Average    Volume
 Date           
 2022-06-09   161     160  46780917
@@ -53,18 +53,18 @@ Date
 ```
 ### Save multiple item histories for future use.
 ```python
->>> coal.save_historical()
+>>> coal.save_history()
 SAVED ITEM: Coal, id: 453
 179 NEW DATES CREATED
 179 RECORDS UPDATED
 
->>> bond.save_historical()
+>>> bond.save_history()
 SAVED ITEM: Old school bond, id: 13190
 179 RECORDS UPDATED
 ```
 ### Check item full history at a later date if past history is saved.
 ```python
->>> coal.full_historical
+>>> coal.full_history()
            Price Average    Volume
 Date           
 2022-06-09   161     160  46780917

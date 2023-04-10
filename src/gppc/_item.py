@@ -14,8 +14,6 @@ from gppc._gppc import _search_item_data
 from gppc._db import DbManager
 from gppc._display import _get_item_pic
 
-_WIKI_API = ''
-_BACKUP_API = ''
 _VAR_PRICE = 'average180'
 _VAR_TRADE = 'trade180'
 _DATA_START = '.push([new Date(\''
@@ -73,23 +71,23 @@ class Item():
         db_man.close_db()
 
     @property
-    def name(self):
+    def name(self) -> str:
         return self.__name
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self.__id
 
     @property
-    def current_price(self):
+    def current_price(self) -> str:
         return self.__price
 
     @property
-    def change_24h(self):
+    def change_24h(self) -> str:
         return self.__change
 
     @property
-    def recent_historical(self):
+    def recent_history(self) -> pandas.DataFrame:
         """Returns the most recent 6-month item history."""
         return Item.__format_history(self.__recent_historical)
 
@@ -102,14 +100,14 @@ class Item():
         return tuple(self.__pc_change_stats)
 
     @property
-    def full_historical(self):
+    def full_history(self):
         """
         Stores recent historical item date in the cache. Then retrieves
         all item history data.
         """
 
         self.__init_item()  # for debugging purposes
-        self.save_historical()
+        self.save_history()
         db_man = DbManager()
         full_historical = tuple(db_man.get_item_past(self.__item_data[1]))
 
@@ -117,7 +115,7 @@ class Item():
 
         return Item.__format_history(full_historical)
 
-    def save_historical(self) -> int:
+    def save_history(self, verbose=False) -> None:
         """
         Stores recent historical item data in the cache. If the item
         already exists it will read the existing data and add any new historical data.
@@ -133,7 +131,8 @@ class Item():
                 db_man.add_date_column(item_date_data[0])
                 create_count += 1
             if not db_man.check_item_date(self.__item_data[1], item_date_data[0]):
-                db_man.store_item_date(self.__item_data[1], *item_date_data)
+                db_man.store_item_date(
+                    self.__item_data[1], *item_date_data, verbose=verbose)
                 update_count += 1
 
         db_man.close_db()
@@ -144,8 +143,6 @@ class Item():
             print(f"{create_count} NEW DATES CREATED")
         if update_count:
             print(f"{update_count} RECORDS UPDATED")
-
-        return update_count
 
     @ staticmethod
     def __process_raw_history(raw_data: str,

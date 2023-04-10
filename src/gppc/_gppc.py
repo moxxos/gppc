@@ -15,23 +15,53 @@ import requests
 # Package Modules
 from gppc.__version__ import __version__
 from gppc.__description__ import __short_description__
-from gppc._display import _print_item_simple, _get_item_pic
+from gppc._display import _print_item_simple, _print_item_full, _get_item_pic
 from gppc._db import DbManager
 
 
 # Constants
+_WIKI_API = 'https://prices.runescape.wiki/api/v1/osrs/mapping'
 _MAIN_URL = 'https://secure.runescape.com/m=itemdb_oldschool'
 _ITEM_PATH = '/viewitem?obj'
 _SEARCH_PATH = '/results#main-search'
 _GET_PARAMETER = 'obj'
 _POST_PARAMETER = 'query'
+_REQUEST_HEADER = {
+    'user-agent': 'Mozilla/5.0'
+}
 _HEADER_PARAMETER_USER_AGENT = 'user-agent'
 _USER_AGENT = 'Mozilla/5.0'
+_SM_IMG_SIZE = 7
+_LG_IMG_SIZE = 9
 
 
 # Calculated constants
 _MAIN_URL_LEN = len(_MAIN_URL)
 _ITEM_PATH_LEN = len(_ITEM_PATH)
+
+
+class Catalogue(list):
+    """Represents a list of items."""
+
+    def __init__(self, *items) -> None:
+        self.__raw_list = requests.get(_WIKI_API,
+                                       headers=_REQUEST_HEADER,
+                                       timeout=100).json()
+        self.__id_map = {}
+        self.__name_map = {}
+        for item in self.__raw_list:
+            update = True
+            if items and item['name'] not in items:
+                update = False
+            if update:
+                self.__id_map.update({item['id']: item})
+                self.__name_map.update({item['name']: item['id']})
+        super().__init__(self.__id_map.values())
+
+    def __getitem__(self, key):
+        if isinstance(key, int):
+            return self.__id_map[key]
+        return self.__id_map[self.__name_map[key]]
 
 
 class _SearchPageParser(HTMLParser):
@@ -151,16 +181,13 @@ def _request_search_page(item: str, page='') -> requests.Response:
 
     :param item:
     """
-    headers = {
-        _HEADER_PARAMETER_USER_AGENT: _USER_AGENT
-    }
     params = {
         _POST_PARAMETER: item,
         'page': page
     }
     return requests.get(
         _MAIN_URL + _SEARCH_PATH,
-        headers=headers,
+        headers=_REQUEST_HEADER,
         params=params, timeout=100)
 
 
@@ -198,6 +225,11 @@ def _command_line_parser(item_argument: str) -> argparse.ArgumentParser:
         nargs='+',
         help='snake case or quoted item(s) (ex: gold_bar or \'gold bar\')'
     )
+    parser.add_argument(
+        '--full', '-f',
+        action='store_true',
+        help='display full price and item information'
+    )
     return parser
 
 
@@ -208,24 +240,28 @@ def _main() -> None:
     args = vars(parser.parse_args())
     for item in args[item_argument]:
         item = item.replace('_', ' ')
-        _search_print(item)
+        _search_print(item, args['full'])
 
 
 if __name__ == "__main__":
     _main()
 
 
-def _search_print(item) -> None:
+def _search_print(item, full=False) -> None:
     db_man = DbManager()
     for item_data in _search_item_data(item):
         if db_man.is_item_stored(item_data[1]):
             _, item_pic = db_man.retrieve_item(item_data[1])
         else:
-            item_pic = _get_item_pic(item_data[5])
+            item_pic = _get_item_pic(
+                item_data[5], (_SM_IMG_SIZE if full else _LG_IMG_SIZE))
             db_man.store_item(item_data[1], item_data[0], item_pic)
-        _print_item_simple(item_data[0], item_data[2],
-                           item_data[3], item_data[4], item_pic)
-
+        if full:
+            _print_item_full(item_data[0], item_data[2],
+                             item_data[3], item_data[4], item_pic)
+        else:
+            _print_item_simple(item_data[0], item_data[2],
+                               item_data[3], item_data[4], item_pic)
     db_man.close_db()
 
 

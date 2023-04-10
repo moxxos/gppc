@@ -18,12 +18,7 @@ keywords = [
 ]
 authors = [{ name = "moxxos" }, { email = "moxxos@proton.me" }]
 license = { text = "GNU AGPLv3" }
-classifiers = [
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-]
+classifiers = ["Programming Language :: Python :: 3"]
 dependencies = ["requests", "climage", "platformdirs", "pandas"]
 dynamic = ["version", "description", "readme", "urls"]
 

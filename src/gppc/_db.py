@@ -71,13 +71,15 @@ class DbManager():
         return False
 
     def store_item_date(self, item_id, input_date: date,
-                        price: str, average: str, volume: str):
+                        price: str, average: str, volume: str,
+                        verbose=False):
         """
         Store an items historical data on the given date.
         Assumes the item's basic data and the date exists.
         """
-        print(str(input_date) + ' SUCCESSFULLY STORED: '
-              + self.__format_date_data(price, average, volume))
+        if verbose:
+            print(str(input_date) + ' SUCCESSFULLY STORED: '
+                  + self.__format_date_data(price, average, volume))
         self.__db_cur.execute(
             f"""UPDATE {_MAINTABLE_NAME}
                 SET {self.__format_date(input_date)} = ?
@@ -90,7 +92,7 @@ class DbManager():
         if (isinstance(input_date, date)):
             input_date = self.__format_date(input_date)
         res = self.__db_cur.execute(f"""SELECT {input_date}
-                                        FROM {_MAINTABLE_NAME} 
+                                        FROM {_MAINTABLE_NAME}
                                         WHERE {_ITEM_ID}='{item_id}'""")
         if (item_date := res.fetchone()) is not None:
             return item_date[0]
@@ -114,8 +116,8 @@ class DbManager():
 
     def is_item_stored(self, item_id: str) -> bool:
         """Check if an item is stored."""
-        res = self.__db_cur.execute(f"""SELECT {_ITEM_ID} 
-                                        FROM {_MAINTABLE_NAME} 
+        res = self.__db_cur.execute(f"""SELECT {_ITEM_ID}
+                                        FROM {_MAINTABLE_NAME}
                                         WHERE {_ITEM_ID}='{item_id}'""")
         return res.fetchone() is not None
 
