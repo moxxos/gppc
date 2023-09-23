@@ -12,5 +12,5 @@ from gppc.__description__ import (
     __author__,
     __title__,
     __copyright__)
-from gppc._gppc import _main, search, Catalogue
-from gppc._item import Item
+from gppc._gppc import _main, _search_print as search
+from gppc._item import Item, Catalog

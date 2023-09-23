@@ -17,51 +17,18 @@ from gppc.__version__ import __version__
 from gppc.__description__ import __short_description__
 from gppc._display import _print_item_simple, _print_item_full, _get_item_pic
 from gppc._db import DbManager
-
-
-# Constants
-_WIKI_API = 'https://prices.runescape.wiki/api/v1/osrs/mapping'
-_MAIN_URL = 'https://secure.runescape.com/m=itemdb_oldschool'
-_ITEM_PATH = '/viewitem?obj'
-_SEARCH_PATH = '/results#main-search'
-_GET_PARAMETER = 'obj'
-_POST_PARAMETER = 'query'
-_REQUEST_HEADER = {
-    'user-agent': 'Mozilla/5.0'
-}
-_HEADER_PARAMETER_USER_AGENT = 'user-agent'
-_USER_AGENT = 'Mozilla/5.0'
-_SM_IMG_SIZE = 7
-_LG_IMG_SIZE = 9
-
+from gppc._constant import (_MAIN_URL,
+                            _ITEM_PATH,
+                            _SEARCH_PATH,
+                            _POST_PARAMETER,
+                            _REQUEST_HEADER,
+                            _SM_IMG_SIZE,
+                            _LG_IMG_SIZE)
+from gppc._item import Item
 
 # Calculated constants
 _MAIN_URL_LEN = len(_MAIN_URL)
 _ITEM_PATH_LEN = len(_ITEM_PATH)
-
-
-class Catalogue(list):
-    """Represents a list of items."""
-
-    def __init__(self, *items) -> None:
-        self.__raw_list = requests.get(_WIKI_API,
-                                       headers=_REQUEST_HEADER,
-                                       timeout=100).json()
-        self.__id_map = {}
-        self.__name_map = {}
-        for item in self.__raw_list:
-            update = True
-            if items and item['name'] not in items:
-                update = False
-            if update:
-                self.__id_map.update({item['id']: item})
-                self.__name_map.update({item['name']: item['id']})
-        super().__init__(self.__id_map.values())
-
-    def __getitem__(self, key):
-        if isinstance(key, int):
-            return self.__id_map[key]
-        return self.__id_map[self.__name_map[key]]
 
 
 class _SearchPageParser(HTMLParser):
@@ -248,23 +215,23 @@ if __name__ == "__main__":
 
 
 def _search_print(item, full=False) -> None:
-    db_man = DbManager()
+    """Preform search"""
+    DbMan = DbManager()
     for item_data in _search_item_data(item):
-        if db_man.is_item_stored(item_data[1]):
-            _, item_pic = db_man.retrieve_item(item_data[1])
-        else:
-            item_pic = _get_item_pic(
-                item_data[5], (_SM_IMG_SIZE if full else _LG_IMG_SIZE))
-            db_man.store_item(item_data[1], item_data[0], item_pic)
-        if full:
-            _print_item_full(item_data[0], item_data[2],
-                             item_data[3], item_data[4], item_pic)
-        else:
-            _print_item_simple(item_data[0], item_data[2],
-                               item_data[3], item_data[4], item_pic)
-    db_man.close_db()
+        try:
+            if DbMan.retrieve_item_info(item_data[1]) is None:
+                item_img = _get_item_pic(item_data[5], (_SM_IMG_SIZE if not full else _LG_IMG_SIZE))
+                item = Item(item_data[0])
+                DbMan.store_item_info(item._Item__info, item_img)
+            else:
+                item_img = DbMan.retrieve_item_info(int(item_data[1]))[9]
 
-
-def search(item) -> None:
-    """Perform search"""
-    _search_print(item)
+            if full:
+                _print_item_full(item_data[0], item_data[2],
+                                 item_data[3], item_data[4], item_img)
+            else:
+                _print_item_simple(item_data[0], item_data[2],
+                                   item_data[3], item_data[4], item_img)
+        except ValueError:
+            print(item_data[0] + ' not found in mapping.')
+    DbMan.close_db()

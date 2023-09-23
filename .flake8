@@ -1,3 +1,5 @@
 [flake8]
-ignore = F401,W503
-max-line-length = 89
+ignore = W503
+per-file-ignores =
+    src/gppc/__init__.py: F401
+max-line-length = 100

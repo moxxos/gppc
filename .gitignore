@@ -11,3 +11,4 @@ test*.py
 *.jpeg
 *.png
 *.sql
+*old.py
