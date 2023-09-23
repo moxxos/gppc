@@ -67,7 +67,7 @@ $ gppc gold_bar coal
 
 [365 rows x 5 columns]
 ```
-### Two other intervals avaible for 2 week and 3 month histories.
+### Two other intervals available for 2 week and 3 month histories.
 ```
 >>> hist_2week = coal.history_2week
 >>> hist_3month = coal.history_3month
@@ -121,7 +121,7 @@ $ gppc gold_bar coal
 365 new records added for item: Silver ore
 365 new records added for item: Tin ore
 ```
-### A catalog with no arguemnts creates a full list of all items in the Grand Exchange.
+### A catalog with no arguments creates a full list of all items in the Grand Exchange.
 ```
 >>> all_items = Catalog()
 >>> len(all_items)
