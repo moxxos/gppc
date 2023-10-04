@@ -292,7 +292,8 @@ class Item():
                              average.strip(_DATA_END),
                              trade))
         return Item.__process_raw_history(raw_data[loc:], output_array)
-
+    
+    # OSRS website backup below
     @staticmethod
     def __format_history(data_historical: list[ItemHistoryData]):
         data = list(map(lambda date_data: date_data[1:], data_historical))
