@@ -1,8 +1,12 @@
-## [0.1.6.] - 2022-12-04
+## [0.1.8] - 2023-9-23
+### API rewrite for faster save time
+### Added Catalog
+
+## [0.1.6] - 2022-12-04
 ### New Item module
 #
 
-## [0.1.5.] - 2022-10-18
+## [0.1.5] - 2022-10-18
 ### Display output now works on Windows.
 ### Added image caching.
 #
