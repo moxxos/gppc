@@ -1,6 +1,7 @@
 # GPPC (Gold Piece Price Checker) 
 
 Check OSRS Grand Exchange prices from the command line. Includes module functionality to check full price history of an item.
+Features caching capability to save item price histories for future use.
 
 # Usage
 
@@ -100,7 +101,7 @@ $ gppc gold_bar coal
 [1281 rows x 5 columns]
 ```
 ### Create catalogs to easily manipulate lists of items.
-```
+```python
 >>> from gppc import Catalog
 >>> ores = Catalog('copper ore', 'tin ore', 'iron ore', 'gold ore', 'silver ore', 'mithril ore', 'adamantite ore', 'runite ore')
 >>> ores.sort()
@@ -122,7 +123,7 @@ $ gppc gold_bar coal
 365 new records added for item: Tin ore
 ```
 ### A catalog with no arguments creates a full list of all items in the Grand Exchange.
-```
+```python
 >>> all_items = Catalog()
 >>> len(all_items)
 4005

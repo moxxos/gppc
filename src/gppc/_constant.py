@@ -9,6 +9,6 @@ _ITEM_PATH = '/viewitem?obj'
 _SEARCH_PATH = '/results#main-search'
 _GET_PARAMETER = 'obj'
 _POST_PARAMETER = 'query'
-_REQUEST_HEADER = {'user-agent': 'Mozilla/5.0'}
+_REQUEST_HEADER = {'user-agent': 'Mozilla/6.0'}
 _SM_IMG_SIZE = 7
 _LG_IMG_SIZE = 9

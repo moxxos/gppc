@@ -1,7 +1,11 @@
 dist/
 build/
+<<<<<<< HEAD
 *.pypirc
 .venv/
+=======
+*venv*
+>>>>>>> refs/remotes/origin/main
 __pycache__/
 *.egg*
 test*.py
