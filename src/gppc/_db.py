@@ -32,6 +32,12 @@ _HIGH_VOL = 'highPriceVolume'
 _LOW_VOL = 'lowPriceVolume'
 
 
+def _clear_cache():
+    appdata_path = user_data_dir(__title__, __author__)
+    if os.path.exists(appdata_path):
+        os.system(str.join('rm -r ', appdata_path))
+
+
 class DbManager():
     """
     Each item has it's own table that looks like:
@@ -70,7 +76,7 @@ class DbManager():
                                        FROM sqlite_master
                                        WHERE name='{_INFO_TABLE}'""")
         if result.fetchone() is None:
-            # limit is sql keyword use 'limit't column name instead
+            # limit is sql keyword use 'limit' column name instead
             self.__db_cur.execute(f"""
                                   CREATE TABLE {_INFO_TABLE} (
                                     {_ITEM_ID},
@@ -142,15 +148,13 @@ class DbManager():
                                      WHERE name='{self.id_to_tablename(item_id)}'""").fetchone()
 
     def store_item_history(self, item_id: int, history: pandas.DataFrame):
+        if (history is None):
+            raise ValueError('Missing API history data')
+
         past_dates = [row[0] for row in self.__db_cur.execute(f"""
                                                               SELECT {_DATE}
                                                               FROM {self.id_to_tablename(item_id)} 
                                                               ORDER BY {_DATE}""").fetchall()]
-
-        # debug stuff
-        # if (past_dates):
-        #    print(past_dates[len(past_dates) - 1])
-        # print(history.iloc[0][_DATE])
 
         # if there are past dates and earliest date to be stored is less than latest
         # existing stamp then check for dupilcate dates and drop
@@ -176,7 +180,3 @@ class DbManager():
     @staticmethod
     def id_to_tablename(item_id: int):
         return 'item' + str(item_id)
-
-
-def foo():
-    print('foo')

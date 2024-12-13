@@ -138,13 +138,16 @@ class Item():
         DbMan = DbManager()
         if (not DbMan.item_table_exists(self.__info['id'])):
             DbMan.create_item_table(self.__info['id'])
+        new_records = 0
         if (timestep):
             if (timestep not in _TIMESTEP_MAP.keys()):
                 raise ValueError('Timestep must one of: ' + str(list(_TIMESTEP_MAP.keys())))
-            new_records = DbMan.store_item_history(
-                self.__info['id'], self.__recent_history[_TIMESTEP_MAP[timestep]])
+            if (self.__recent_history[_TIMESTEP_MAP[timestep]] is not None):
+                new_records = DbMan.store_item_history(self.__info['id'],
+                                                       self.__recent_history[_TIMESTEP_MAP[timestep]])
+            else:
+                print('Missing API history data for: ' + self.__info['name'])
         else:
-            new_records = 0
             for ts in self.__recent_history:
                 if (self.__recent_history[ts] is not None):
                     new_records = new_records + DbMan.store_item_history(
