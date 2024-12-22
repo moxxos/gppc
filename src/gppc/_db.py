@@ -133,12 +133,16 @@ class DbManager():
     def create_item_table(self, item_id: int) -> None:
         self.__db_cur.execute(f"""
                               CREATE TABLE
-                              {'item' + str(item_id)} 
+                              {'item' + str(item_id)}
                               ({_DATE} PRIMARY KEY,
                               {_AVG_HIGH},
                               {_AVG_LOW},
                               {_HIGH_VOL},
                               {_LOW_VOL})""")
+        self.__db_conn.commit()
+
+    def delete_item_table(self, item_id: int) -> None:
+        self.__db_cur.execute(f"""DROP TABLE {self.id_to_tablename(item_id)}""")
         self.__db_conn.commit()
 
     def item_table_exists(self, item_id: int) -> bool:
@@ -149,16 +153,16 @@ class DbManager():
 
     def store_item_history(self, item_id: int, history: pandas.DataFrame):
         if (history is None):
-            raise ValueError('Missing API history data')
+            raise ValueError('Missing API history data for: ' + self.id_to_tablename(item_id))
 
         past_dates = [row[0] for row in self.__db_cur.execute(f"""
                                                               SELECT {_DATE}
-                                                              FROM {self.id_to_tablename(item_id)} 
+                                                              FROM {self.id_to_tablename(item_id)}
                                                               ORDER BY {_DATE}""").fetchall()]
 
         # if there are past dates and earliest date to be stored is less than latest
         # existing stamp then check for dupilcate dates and drop
-        if (past_dates and history.iloc[0][_DATE] < past_dates[len(past_dates) - 1]):
+        if (past_dates and history.iloc[0][_DATE] <= past_dates[len(past_dates) - 1]):
             history = history.drop(history[history[_DATE].isin(past_dates)].index)
         # else no stored dates yet or earliest data to be stored timestamp
         # is greater than latest existing time stamp just store right away

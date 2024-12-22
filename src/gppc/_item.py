@@ -4,9 +4,9 @@ Encapsulates all historical data of a single item.
 Copyright (C) 2022 moxxos
 """
 
-from collections.abc import Iterator
 from datetime import datetime
 from html.parser import HTMLParser
+from typing import Iterator
 
 import requests
 import pandas
@@ -40,31 +40,50 @@ class Catalog(list):
 
     def __init__(self, *items) -> None:
         self.__id_map = {}  # id -> name
-        self.__name_map = {}  # name -> id
         self.__pos_map = {}  # name -> position in raw list
+        self.__item_map = []  # position in catalog to item
+        self.__name_map = {}  # name -> position in catalog
+        index = 0
         for item_name in (items if items else _NAME_LIST):
             try:
                 if items:
                     item_name = item_name[0].capitalize() + item_name[1:]
                 self.__id_map.update(
-                    {(id := _RAW_LIST[(pos := _NAME_LIST.index(item_name))])['id']: item_name})
-                self.__name_map.update({item_name: id})
+                    {(_id := _RAW_LIST[(pos := _NAME_LIST.index(item_name))])['id']: item_name})
                 self.__pos_map.update({item_name: pos})
+                self.__item_map.append(Item(item_name, pos))
+                self.__name_map.update({item_name: index})
                 # print("Successfully added: " + item_name)
             except ValueError:
                 print(item_name + " was not found")
+            index += 1
         # print(self.__id_map.values())
         super().__init__(self.__id_map.values())
 
     def __getitem__(self, key):
         if isinstance(key, int):
-            return Item((item_name := super().__getitem__(key)), self.__pos_map[item_name])
-        return Item(key, self.__pos_map[key])
-        # I can make item do all the hard lifting from here I think
+            # return Item((item_name := super().__getitem__(key)), self.__pos_map[item_name])
+            return self.__item_map[key]
+        if isinstance(key, slice):
+            start = 0
+            if key.start is not None:
+                start = key.start
+            stop = len(self.__id_map)
+            if key.stop is not None:
+                stop = key.stop
+            arr = []
+            for index in range(start, stop):
+                arr.append(super().__getitem__(index))
+            return Catalog(*arr)
+        return self.__item_map[self.__name_map[key]]
 
     def __iter__(self) -> Iterator:
+        """
         for item_name in super().__iter__():
             yield Item(item_name, self.__pos_map[item_name])
+        """
+        for item in self.__item_map:
+            yield item
 
     def save_history(self, timestep=None):
         if timestep and timestep not in _TIMESTEP_MAP.keys():
@@ -86,6 +105,9 @@ class Item():
         if ((item_name := item_name[0].capitalize() + item_name[1:]) in _NAME_LIST):
             _raw_list_pos = _raw_list_pos if _raw_list_pos else _NAME_LIST.index(item_name)
             self.__info = _RAW_LIST[_raw_list_pos]
+            if ('lowalch' not in self.__info.keys()):
+                self.__info['lowalch'] = 'Not alchemisable'
+                self.__info['highalch'] = 'Not alchemisable'
             self.__change = None
             self.__recent_history = {'5m': None, '1h': None, '6h': None, '24h': None}
 
@@ -140,7 +162,7 @@ class Item():
             DbMan.create_item_table(self.__info['id'])
         new_records = 0
         if (timestep):
-            if (timestep not in _TIMESTEP_MAP.keys()):
+            if (timestep not in _TIMESTEP_MAP):
                 raise ValueError('Timestep must one of: ' + str(list(_TIMESTEP_MAP.keys())))
             if (self.__recent_history[_TIMESTEP_MAP[timestep]] is not None):
                 new_records = DbMan.store_item_history(self.__info['id'],
@@ -154,6 +176,13 @@ class Item():
                         self.__info['id'], self.__recent_history[ts])
         DbMan.close_db()
         print(str(new_records) + ' new records added for item: ' + self.__info['name'])
+
+    def delete_history(self):
+        DbMan = DbManager()
+        if not DbMan.item_table_exists(self.__info['id']):
+            return
+        DbMan.delete_item_table(self.__info['id'])
+        DbMan.close_db()
 
     def __init_stats_no_api(self):
 
@@ -269,6 +298,9 @@ class Item():
             history['timestamp'] = history['timestamp'].map(datetime.fromtimestamp)
         return history
 
+    def __str__(self):
+        return self.name
+
     @staticmethod
     def __process_raw_history(raw_data: str,
                               output_array: list[str, str]):
@@ -295,7 +327,7 @@ class Item():
                              average.strip(_DATA_END),
                              trade))
         return Item.__process_raw_history(raw_data[loc:], output_array)
-    
+
     # OSRS website backup below
     @staticmethod
     def __format_history(data_historical: list[ItemHistoryData]):
